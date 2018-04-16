@@ -66,7 +66,10 @@ class AccelPlotter extends Component {
 
   reset() {
     SensorManager.stopAccelerometer();
-    this.data = []
+    this.data = [];
+    this.smoothData = [];
+    this.sampleCount = 0;
+    this.rollingAvgSum = 0;
     this.setState({data: [], lastData: [0, 0, 0], reset: true, running: false, smoothData: [], steps: 0});
   }
 

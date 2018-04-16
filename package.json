@@ -14,7 +14,7 @@
     "react-native": "0.55.2",
     "react-native-sensor-manager": "^0.1.10",
     "react-native-stopwatch-timer": "^0.0.20",
-    "react-native-svg": "^6.2.1",
+    "react-native-svg": "^6.3.1",
     "react-native-svg-charts": "^5.0.0",
     "react-native-swipe-view": "^3.0.1"
   },
