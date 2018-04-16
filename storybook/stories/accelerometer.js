@@ -16,7 +16,7 @@ class AccelerometerExample extends Component {
   }
 
   processNewData(data) {
-    var newData = [data.x, data.y, data.z]
+    var newData = [data.x, data.y, data.z];
     this.setState({data: newData});
   }
 

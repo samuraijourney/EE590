@@ -4,16 +4,18 @@ import { SensorManager } from 'NativeModules';
 import { Stopwatch } from 'react-native-stopwatch-timer';
 import ShowcaseCard from './decorators/showcase-container'
 import { Defs, LinearGradient, Stop } from 'react-native-svg'
-import { LineChart } from 'react-native-svg-charts'
+import { LineChart, YAxis } from 'react-native-svg-charts'
 
 class AccelPlotter extends Component {
   constructor(props) {
     super(props);
     this.state = {
       data: [],
+      lastData: [0, 0, 0],
       reset: false,
       running: false
     };
+    this.frequency = 20.0
     this.processNewData = this.processNewData.bind(this);
     this.reset = this.reset.bind(this);
     this.toggle = this.toggle.bind(this);
@@ -29,23 +31,24 @@ class AccelPlotter extends Component {
   }
 
   processNewData(newData) {
-    this.data.push(this.getMagnitude(newData))
-    this.setState({data: this.data});
+    this.data.push(this.getMagnitude(newData));
+    this.setState({lastData: [newData.x, newData.y, newData.z]});
   }
 
   reset() {
     SensorManager.stopAccelerometer();
     this.data = []
-    this.setState({data: this.data, reset: true, running: false});
+    this.setState({data: [], lastData: [0, 0, 0], reset: true, running: false});
   }
 
   toggle() {
     if (!this.state.running) {
-      SensorManager.startAccelerometer(100);
-      this.setState({reset: false});
+      SensorManager.startAccelerometer(1000.0 / this.frequency);
+      this.setState({data: [], reset: false});
 
     } else {
       SensorManager.stopAccelerometer();
+      this.setState({data: this.data});
     }
 
     this.setState({running: !this.state.running});
@@ -60,17 +63,38 @@ class AccelPlotter extends Component {
           </LinearGradient>
       </Defs>
     )
+    
+    const contentInset = { top: 20, bottom: 20 }
+
+    var x = this.state.lastData[0].toFixed(9);
+    var y = this.state.lastData[1].toFixed(9);
+    var z = this.state.lastData[2].toFixed(9);
 
     return (
       <View>
         <ShowcaseCard>
-          <LineChart
-            style={{ height: 200 }}
-            data={ this.state.data }
-            contentInset={{ top: 20, bottom: 20 }}
-            svg={{strokeWidth: 2, stroke: 'url(#gradient)'}}>
-            <Gradient/>
-          </LineChart>
+          <View style={{ height: 200, flexDirection: 'row' }}>
+            <YAxis
+              data={ this.state.data }
+              contentInset={ contentInset }
+              svg={{
+                  fill: 'grey',
+                  fontSize: 10,
+              }}
+              numberOfTicks={ 10 }/>
+            <LineChart
+              style={{ flex: 1, marginLeft: 16 }}
+              data={ this.state.data }
+              contentInset={ contentInset }
+              svg={{strokeWidth: 2, stroke: 'url(#gradient)'}}>
+              <Gradient/>
+            </LineChart>
+          </View>
+        </ShowcaseCard>
+        <ShowcaseCard>
+          <Text style={styles.text}>x: {x}</Text>
+          <Text style={styles.text}>y: {y}</Text>
+          <Text style={styles.text}>z: {z}</Text>
         </ShowcaseCard>
         <ShowcaseCard>
           <View style={styles.stopwatch}>
@@ -118,6 +142,18 @@ const styles = {
     borderRadius: 40,
     textAlign: 'center',
     width: 150
+  },
+  titleText: {
+    fontSize: 40,
+    color: '#000',
+    marginLeft: 7,
+    textAlign: 'center',
+  },
+  text: {
+    fontSize: 40,
+    color: '#000',
+    marginLeft: 7,
+    textAlign: 'center'
   }
 }
 
