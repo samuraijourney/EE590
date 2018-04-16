@@ -12,6 +12,7 @@
     "eslint": "^4.19.1",
     "react": "16.3.1",
     "react-native": "0.55.2",
+    "react-native-sensor-manager": "^0.1.10",
     "react-native-stopwatch-timer": "^0.0.20",
     "react-native-svg": "^6.2.1",
     "react-native-svg-charts": "^5.0.0"
