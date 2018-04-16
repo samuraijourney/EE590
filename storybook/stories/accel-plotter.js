@@ -4,7 +4,7 @@ import { SensorManager } from 'NativeModules';
 import { Stopwatch } from 'react-native-stopwatch-timer';
 import ShowcaseCard from './decorators/showcase-container'
 import { Defs, LinearGradient, Stop } from 'react-native-svg'
-import { LineChart, YAxis } from 'react-native-svg-charts'
+import { LineChart, YAxis, Grid } from 'react-native-svg-charts'
 
 class AccelPlotter extends Component {
   constructor(props) {
@@ -12,6 +12,7 @@ class AccelPlotter extends Component {
     this.state = {
       data: [],
       lastData: [0, 0, 0],
+      steps: 0,
       reset: false,
       running: false
     };
@@ -38,7 +39,7 @@ class AccelPlotter extends Component {
   reset() {
     SensorManager.stopAccelerometer();
     this.data = []
-    this.setState({data: [], lastData: [0, 0, 0], reset: true, running: false});
+    this.setState({data: [], lastData: [0, 0, 0], reset: true, running: false, steps: 0});
   }
 
   toggle() {
@@ -66,9 +67,11 @@ class AccelPlotter extends Component {
     
     const contentInset = { top: 20, bottom: 20 }
 
-    var x = this.state.lastData[0].toFixed(9);
-    var y = this.state.lastData[1].toFixed(9);
-    var z = this.state.lastData[2].toFixed(9);
+    var x = this.state.lastData[0].toFixed(3);
+    var y = this.state.lastData[1].toFixed(3);
+    var z = this.state.lastData[2].toFixed(3);
+
+    var stepCount = this.state.steps;
 
     return (
       <View>
@@ -88,14 +91,20 @@ class AccelPlotter extends Component {
               contentInset={ contentInset }
               svg={{strokeWidth: 2, stroke: 'url(#gradient)'}}>
               <Gradient/>
+              <Grid/>
             </LineChart>
           </View>
         </ShowcaseCard>
-        <ShowcaseCard>
-          <Text style={styles.text}>x: {x}</Text>
-          <Text style={styles.text}>y: {y}</Text>
-          <Text style={styles.text}>z: {z}</Text>
-        </ShowcaseCard>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-evenly' }}>
+          <ShowcaseCard style={{ flex: 1 }}>
+            <Text style={styles.text}>x: {x}</Text>
+            <Text style={styles.text}>y: {y}</Text>
+            <Text style={styles.text}>z: {z}</Text>
+          </ShowcaseCard>
+          <ShowcaseCard style={{ flex: 1 }}>
+            <Text style={styles.stepText}>{stepCount}</Text>
+          </ShowcaseCard>
+        </View>
         <ShowcaseCard>
           <View style={styles.stopwatch}>
             <Stopwatch msecs 
@@ -143,17 +152,18 @@ const styles = {
     textAlign: 'center',
     width: 150
   },
-  titleText: {
-    fontSize: 40,
+  stepText: {
+    fontSize: 100,
     color: '#000',
-    marginLeft: 7,
     textAlign: 'center',
+    marginTop: 13,
+    width: 120
   },
   text: {
     fontSize: 40,
     color: '#000',
-    marginLeft: 7,
-    textAlign: 'center'
+    textAlign: 'center',
+    width: 165
   }
 }
 
