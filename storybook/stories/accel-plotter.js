@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { DeviceEventEmitter, Text, View, TouchableHighlight } from 'react-native';
+import { DeviceEventEmitter, ScrollView, Text, View, TouchableHighlight } from 'react-native';
 import { SensorManager } from 'NativeModules';
 import { Stopwatch } from 'react-native-stopwatch-timer';
 import ShowcaseCard from './decorators/showcase-container'
@@ -11,6 +11,7 @@ class AccelPlotter extends Component {
     super(props);
     this.state = {
       data: [],
+      smoothData: [],
       lastData: [0, 0, 0],
       steps: 0,
       reset: false,
@@ -20,7 +21,20 @@ class AccelPlotter extends Component {
     this.processNewData = this.processNewData.bind(this);
     this.reset = this.reset.bind(this);
     this.toggle = this.toggle.bind(this);
-    this.data = []
+    this.data = [];
+    this.rollingAvgSum = 0;
+    this.sampleCount = 0;
+    this.smoothingWindow = [
+      1.0 / 7,
+      1.0 / 7,
+      1.0 / 7,
+      1.0 / 7,
+      1.0 / 7,
+      1.0 / 7,
+      1.0 / 7
+    ]
+    this.smoothData = [];
+    this.smoothingWindowSize = this.smoothingWindow.length;
     DeviceEventEmitter.addListener('Accelerometer', this.processNewData);
   }
 
@@ -34,22 +48,36 @@ class AccelPlotter extends Component {
   processNewData(newData) {
     this.data.push(this.getMagnitude(newData));
     this.setState({lastData: [newData.x, newData.y, newData.z]});
+    if (this.sampleCount > this.smoothingWindowSize) {
+      this.rollingAvgSum += this.data[this.sampleCount];
+      this.rollingAvgSum -= this.data[this.sampleCount - this.smoothingWindowSize];
+      this.smoothData[this.sampleCount - this.smoothingWindowSize] = this.rollingAvgSum / this.smoothingWindowSize;
+
+    } else if (this.sampleCount == this.smoothingWindowSize) {
+      for(var i = 0; i < this.smoothingWindowSize; i++) {
+        this.rollingAvgSum += this.data[i];
+      }
+
+      this.smoothData[0] = this.rollingAvgSum / this.smoothingWindowSize;
+    }
+
+    this.sampleCount++
   }
 
   reset() {
     SensorManager.stopAccelerometer();
     this.data = []
-    this.setState({data: [], lastData: [0, 0, 0], reset: true, running: false, steps: 0});
+    this.setState({data: [], lastData: [0, 0, 0], reset: true, running: false, smoothData: [], steps: 0});
   }
 
   toggle() {
     if (!this.state.running) {
       SensorManager.startAccelerometer(1000.0 / this.frequency);
-      this.setState({data: [], reset: false});
+      this.setState({data: [], smoothData: [], reset: false});
 
     } else {
       SensorManager.stopAccelerometer();
-      this.setState({data: this.data});
+      this.setState({data: this.data, smoothData: this.smoothData});
     }
 
     this.setState({running: !this.state.running});
@@ -75,26 +103,53 @@ class AccelPlotter extends Component {
 
     return (
       <View>
-        <ShowcaseCard>
-          <View style={{ height: 200, flexDirection: 'row' }}>
-            <YAxis
-              data={ this.state.data }
-              contentInset={ contentInset }
-              svg={{
-                  fill: 'grey',
-                  fontSize: 10,
-              }}
-              numberOfTicks={ 10 }/>
-            <LineChart
-              style={{ flex: 1, marginLeft: 16 }}
-              data={ this.state.data }
-              contentInset={ contentInset }
-              svg={{strokeWidth: 2, stroke: 'url(#gradient)'}}>
-              <Gradient/>
-              <Grid/>
-            </LineChart>
-          </View>
-        </ShowcaseCard>
+        <ScrollView 
+          horizontal={true}
+          snapToInterval={348} 
+          decelerationRate={0} 
+          snapToAlignment={"center"}
+          showsHorizontalScrollIndicator={false}>
+          <ShowcaseCard>
+            <View style={{ height: 200, width: 348, flexDirection: 'row' }}>
+              <YAxis
+                data={ this.state.data }
+                contentInset={ contentInset }
+                svg={{
+                    fill: 'grey',
+                    fontSize: 10,
+                }}
+                numberOfTicks={ 10 }/>
+              <LineChart
+                style={{ flex: 1, marginLeft: 16 }}
+                data={ this.state.data }
+                contentInset={ contentInset }
+                svg={{strokeWidth: 2, stroke: 'url(#gradient)'}}>
+                <Gradient/>
+                <Grid/>
+              </LineChart>
+            </View>
+          </ShowcaseCard>
+          <ShowcaseCard>
+            <View style={{ height: 200, width: 348, flexDirection: 'row' }}>
+              <YAxis
+                data={ this.state.smoothData }
+                contentInset={ contentInset }
+                svg={{
+                    fill: 'grey',
+                    fontSize: 10,
+                }}
+                numberOfTicks={ 10 }/>
+              <LineChart
+                style={{ flex: 1, marginLeft: 16 }}
+                data={ this.state.smoothData }
+                contentInset={ contentInset }
+                svg={{strokeWidth: 2, stroke: 'url(#gradient)'}}>
+                <Gradient/>
+                <Grid/>
+              </LineChart>
+            </View>
+          </ShowcaseCard>
+        </ScrollView>
         <View style={{ flexDirection: 'row', justifyContent: 'space-evenly' }}>
           <ShowcaseCard style={{ flex: 1 }}>
             <Text style={styles.text}>x: {x}</Text>
