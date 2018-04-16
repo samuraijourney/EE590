@@ -46,6 +46,8 @@ import PartialLineChart from './partial-chart/line-chart'
 
 import OrderExample from './order'
 
+import StopwatchExample from './stopwatch';
+
 storiesOf('AreaChart', module)
     .addDecorator(getStory => <ShowcaseCard>{ getStory() }</ShowcaseCard>)
     .add('Standard', () => <AreaChart/>)
@@ -98,3 +100,4 @@ storiesOf('Others', module)
     .add('Partial Area Chart', () => <PartialAreaChart/>)
     .add('Partial Line Chart', () => <PartialLineChart/>)
     .add('Ordering', () => <OrderExample/>)
+    .add('Stopwatch', () => <StopwatchExample/>)
