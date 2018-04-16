@@ -48,6 +48,7 @@ import OrderExample from './order'
 
 import StopwatchExample from './stopwatch';
 import AccelerometerExample from './accelerometer';
+import AccelPlotter from './accel-plotter';
 
 storiesOf('AreaChart', module)
     .addDecorator(getStory => <ShowcaseCard>{ getStory() }</ShowcaseCard>)
@@ -103,3 +104,6 @@ storiesOf('Others', module)
     .add('Ordering', () => <OrderExample/>)
     .add('Stopwatch', () => <StopwatchExample/>)
     .add('Accelerometer', () => <AccelerometerExample/>)
+
+storiesOf('Screens', module)
+    .add('Accel plotter', () => <AccelPlotter/>)

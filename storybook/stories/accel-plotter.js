@@ -2,19 +2,21 @@ import React, { Component } from 'react';
 import { DeviceEventEmitter, Text, View, TouchableHighlight } from 'react-native';
 import { SensorManager } from 'NativeModules';
 import { Stopwatch } from 'react-native-stopwatch-timer';
+import ShowcaseCard from './decorators/showcase-container'
 
 class AccelPlotter extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      data: [],
+      reset: false,
       running: false
     };
-    this.start = this.start.bind(this);
-    this.stop = this.stop.bind(this);
+    this.processNewData = this.processNewData.bind(this);
+    this.reset = this.reset.bind(this);
+    this.toggle = this.toggle.bind(this);
     this.data = []
-    DeviceEventEmitter.addListener('Accelerometer', function (data) {
-        this.data.push(this.getMagnitude(data));
-    });
+    DeviceEventEmitter.addListener('Accelerometer', this.processNewData);
   }
 
   getMagnitude(data) {
@@ -24,36 +26,48 @@ class AccelPlotter extends Component {
     return Math.sqrt(x*x + y*y + z*z);
   }
 
-  start() {
-    if (!this.state.running) {
-        SensorManager.startAccelerometer(100);
-        this.setState({running: true});
-    }
+  processNewData(newData) {
+    this.data.push(this.getMagnitude(newData))
+    this.setState({data: this.data});
   }
 
-  stop() {
-    if (this.state.running) {
-        SensorManager.stopAccelerometer();
-    }
+  reset() {
+    SensorManager.stopAccelerometer();
+    this.data = []
+    this.setState({reset: true, running: false});
   }
- 
+
+  toggle() {
+    if (!this.state.running) {
+      SensorManager.startAccelerometer(100);
+      this.setState({reset: false});
+
+    } else {
+      SensorManager.stopAccelerometer();
+    }
+
+    this.setState({running: !this.state.running});
+  }
+
   render() {
     return (
       <View>
-        <View style={styles.stopwatch}>
-          <Stopwatch msecs start={this.state.start}
-            reset={this.state.stop}
-            options={options}
-            getTime={this.getFormattedTime} />
-        </View>
-        <View style={styles.buttonContainer}>
-          <TouchableHighlight style={styles.buttonChoice} onPress={this.toggleStopwatch}>
-            <Text style={styles.button}>{!this.state.start ? "Start" : "Stop"}</Text>
-          </TouchableHighlight>
-          <TouchableHighlight style={styles.buttonChoice} onPress={this.resetStopwatch}>
-            <Text style={styles.button}>Reset</Text>
-          </TouchableHighlight>
-        </View>
+        <ShowcaseCard>
+          <View style={styles.stopwatch}>
+            <Stopwatch msecs 
+              start={this.state.running}
+              reset={this.state.reset}
+              options={options} />
+          </View>
+          <View style={styles.buttonContainer}>
+            <TouchableHighlight style={styles.buttonChoice} onPress={this.toggle}>
+              <Text style={styles.button}>{!this.state.running ? "Start" : "Stop"}</Text>
+            </TouchableHighlight>
+            <TouchableHighlight style={styles.buttonChoice} onPress={this.reset}>
+              <Text style={styles.button}>Reset</Text>
+            </TouchableHighlight>
+          </View>
+        </ShowcaseCard>
       </View>
     );
   }
@@ -89,13 +103,14 @@ const styles = {
 
 const options = {
   container: {
-    backgroundColor: '#000',
+    backgroundColor: '#ddd',
     padding: 15,
+    borderRadius: 50,
     width: 330
   },
   text: {
     fontSize: 50,
-    color: '#FFF',
+    color: '#000',
     marginLeft: 7,
   }
 };
