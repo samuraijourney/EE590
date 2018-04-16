@@ -143,6 +143,7 @@ const styles = {
   },
   button: {
     backgroundColor: '#ddd',
+    color: '#000',
     fontSize: 30,
     paddingTop: 15,
     paddingBottom: 15,
