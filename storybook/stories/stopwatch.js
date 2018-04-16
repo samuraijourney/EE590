@@ -73,13 +73,14 @@ const styles = {
 
 const options = {
   container: {
-    backgroundColor: '#000',
+    backgroundColor: '#ddd',
     padding: 15,
+    borderRadius: 50,
     width: 330
   },
   text: {
     fontSize: 50,
-    color: '#FFF',
+    color: '#000',
     marginLeft: 7,
   }
 };
