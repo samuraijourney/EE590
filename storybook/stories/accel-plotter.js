@@ -33,9 +33,17 @@ class AccelPlotter extends Component {
       1.0 / 7,
       1.0 / 7
     ]
+    this.firstDerivatives = [];
+    this.secondDerivatives = [];
     this.smoothData = [];
     this.smoothingWindowSize = this.smoothingWindow.length;
     DeviceEventEmitter.addListener('Accelerometer', this.processNewData);
+  }
+
+  computeStepCount(startIndex) {
+    for (var i = startIndex; i < this.smoothData.length; i++) {
+      this.rollingAvgSum += this.data[i];
+    }
   }
 
   getMagnitude(data) {
@@ -51,23 +59,31 @@ class AccelPlotter extends Component {
     if (this.sampleCount > this.smoothingWindowSize) {
       this.rollingAvgSum += this.data[this.sampleCount];
       this.rollingAvgSum -= this.data[this.sampleCount - this.smoothingWindowSize];
-      this.smoothData[this.sampleCount - this.smoothingWindowSize] = this.rollingAvgSum / this.smoothingWindowSize;
+      var smoothIndex = this.sampleCount - this.smoothingWindowSize;
+      this.smoothData[smoothIndex] = this.rollingAvgSum / this.smoothingWindowSize;
+      this.firstDerivatives[smoothIndex] = this.smoothData[smoothIndex] - this.smoothData[smoothIndex - 1];
+      if ((smoothIndex - 2) > 0) {
+        this.secondDerivatives[smoothIndex - 1] = 
+          this.smoothData[smoothIndex] - 2 * this.smoothData[smoothIndex - 1] - this.smoothData[smoothIndex - 2];
+      }
 
     } else if (this.sampleCount == this.smoothingWindowSize) {
-      for(var i = 0; i < this.smoothingWindowSize; i++) {
+      for (var i = 0; i < this.smoothingWindowSize; i++) {
         this.rollingAvgSum += this.data[i];
       }
 
       this.smoothData[0] = this.rollingAvgSum / this.smoothingWindowSize;
     }
 
-    this.sampleCount++
+    this.sampleCount++;
   }
 
   reset() {
     SensorManager.stopAccelerometer();
     this.data = [];
     this.smoothData = [];
+    this.firstDerivatives = [];
+    this.secondDerivatives = [];
     this.sampleCount = 0;
     this.rollingAvgSum = 0;
     this.setState({data: [], lastData: [0, 0, 0], reset: true, running: false, smoothData: [], steps: 0});
