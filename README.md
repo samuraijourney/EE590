@@ -1,5 +1,4 @@
-# EE590
-Step!
+# Welcome to Step!
 
 This is a react-native application which can do some very basic step counting on Android!
 
