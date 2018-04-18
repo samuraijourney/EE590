@@ -17,33 +17,23 @@ class AccelPlotter extends Component {
       reset: false,
       running: false
     };
-    this.frequency = 20.0
+
     this.processNewData = this.processNewData.bind(this);
     this.reset = this.reset.bind(this);
     this.toggle = this.toggle.bind(this);
+
     this.data = [];
+    this.frequency = 20.0
+    this.lastMinMax = 0;
     this.rollingAvgSum = 0;
     this.sampleCount = 0;
-    this.smoothingWindow = [
-      1.0 / 7,
-      1.0 / 7,
-      1.0 / 7,
-      1.0 / 7,
-      1.0 / 7,
-      1.0 / 7,
-      1.0 / 7
-    ]
-    this.firstDerivatives = [];
-    this.secondDerivatives = [];
     this.smoothData = [];
-    this.smoothingWindowSize = this.smoothingWindow.length;
+    
     DeviceEventEmitter.addListener('Accelerometer', this.processNewData);
-  }
 
-  computeStepCount(startIndex) {
-    for (var i = startIndex; i < this.smoothData.length; i++) {
-      this.rollingAvgSum += this.data[i];
-    }
+    this.gain = 3.414213562;
+    this.xv = [0, 0, 0];
+    this.yv = [0, 0, 0];
   }
 
   getMagnitude(data) {
@@ -52,27 +42,30 @@ class AccelPlotter extends Component {
     z = data.z;
     return Math.sqrt(x*x + y*y + z*z);
   }
-
+  
   processNewData(newData) {
     this.data.push(this.getMagnitude(newData));
     this.setState({lastData: [newData.x, newData.y, newData.z]});
-    if (this.sampleCount > this.smoothingWindowSize) {
-      this.rollingAvgSum += this.data[this.sampleCount];
-      this.rollingAvgSum -= this.data[this.sampleCount - this.smoothingWindowSize];
-      var smoothIndex = this.sampleCount - this.smoothingWindowSize;
-      this.smoothData[smoothIndex] = this.rollingAvgSum / this.smoothingWindowSize;
-      this.firstDerivatives[smoothIndex] = this.smoothData[smoothIndex] - this.smoothData[smoothIndex - 1];
-      if ((smoothIndex - 2) > 0) {
-        this.secondDerivatives[smoothIndex - 1] = 
-          this.smoothData[smoothIndex] - 2 * this.smoothData[smoothIndex - 1] - this.smoothData[smoothIndex - 2];
-      }
+    this.xv[0] = this.xv[1]; 
+    this.xv[1] = this.xv[2]; 
+    this.xv[2] = this.data[this.sampleCount] / this.gain;
+    this.yv[0] = this.yv[1]; 
+    this.yv[1] = this.yv[2]; 
+    this.yv[2] = (this.xv[0] + this.xv[2]) + 2 * this.xv[1] + ( -0.6413515381 * this.yv[0]) + (  1.5610180758 * this.yv[1]);
+    this.smoothData[this.sampleCount] = this.yv[2];
 
-    } else if (this.sampleCount == this.smoothingWindowSize) {
-      for (var i = 0; i < this.smoothingWindowSize; i++) {
-        this.rollingAvgSum += this.data[i];
+    if (this.sampleCount > 0) {
+      newDerivative = this.smoothData[this.sampleCount] - this.smoothData[this.sampleCount - 1];
+      if (newDerivative < 0.01) {
+        newLastMinMax = this.sampleCount;
+        if (this.lastMinMax > 0) {
+          if ((this.smoothData[newLastMinMax] - this.smoothData[this.lastMinMax]) > 5) {
+            this.setState({steps: this.state.steps + 1});
+          }
+        }
+        
+        this.lastMinMax = newLastMinMax;
       }
-
-      this.smoothData[0] = this.rollingAvgSum / this.smoothingWindowSize;
     }
 
     this.sampleCount++;
