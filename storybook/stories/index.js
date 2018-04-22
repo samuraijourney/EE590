@@ -48,7 +48,10 @@ import OrderExample from './order'
 
 import StopwatchExample from './stopwatch';
 import AccelerometerExample from './accelerometer';
+import GyroscopeExample from './gyroscope';
+
 import AccelPlotter from './accel-plotter';
+import RandomForestTrainer from './ml.js';
 
 storiesOf('AreaChart', module)
     .addDecorator(getStory => <ShowcaseCard>{ getStory() }</ShowcaseCard>)
@@ -104,6 +107,8 @@ storiesOf('Others', module)
     .add('Ordering', () => <OrderExample/>)
     .add('Stopwatch', () => <StopwatchExample/>)
     .add('Accelerometer', () => <AccelerometerExample/>)
+    .add('Gyroscope', () => <GyroscopeExample/>)
 
 storiesOf('Screens', module)
     .add('Accel plotter', () => <AccelPlotter/>)
+    .add('Random forest trainer', () => <RandomForestTrainer/>)
