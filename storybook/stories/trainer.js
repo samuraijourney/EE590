@@ -50,8 +50,6 @@ class Trainer extends Component {
     }
 
     renderScene(props) {
-        console.log(props.route.key)
-        console.log(this.state.index)
         const scenes = {
             'sampler':  <GestureSampler 
                             onSample={this.updateSample}/>,

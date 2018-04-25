@@ -268,7 +268,7 @@ class GestureSampler extends Component {
                     decelerationRate={0} 
                     snapToAlignment={"center"}
                     showsHorizontalScrollIndicator={false}
-                    style={{ flex: 1, backgroundColor: '#8BC34A' }}>
+                    style={{ flex: 1 }}>
                     <ShowcaseCard>
                         <View style={{ height: 200, width: 348, flexDirection: 'row' }}>
                             <YAxis
@@ -310,15 +310,15 @@ class GestureSampler extends Component {
                         </View>
                     </ShowcaseCard>
                 </ScrollView>
-                <View style={{ flex: 1, backgroundColor: '#e3aa1a'}}>
+                <View style={{ flex: 1 }}>
                     <View style={{ flexDirection: 'row', flex: 1}}>
-                        <View style={{ flex: 0.73, backgroundColor: '#e4456a'}}>
+                        <View style={{ flex: 0.73 }}>
                             <ShowcaseCard>
                                 <Text style={styles.text}>x: {x} y: {y} z: {z}</Text>
                                 <Text style={styles.text}>a: {wx} b: {wy} g: {wz}</Text>
                             </ShowcaseCard>
                         </View>
-                        <View style={{ flex: 0.27, backgroundColor: '#ffff00' }}>
+                        <View style={{ flex: 0.27 }}>
                             <ShowcaseCard>
                                 <View style={{alignItems: 'center'}}>
                                     <Text style={styles.gestureText}>{this.state.gestureCount}</Text>
@@ -333,7 +333,7 @@ class GestureSampler extends Component {
                     decelerationRate={0} 
                     snapToAlignment={"center"}
                     showsHorizontalScrollIndicator={false}
-                    style={{ flex: 1, backgroundColor: '#2196F3' }}>
+                    style={{ flex: 1 }}>
                     <ShowcaseCard>
                         <View style={styles.stopwatch}>
                             <Timer msecs 

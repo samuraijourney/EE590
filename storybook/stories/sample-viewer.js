@@ -39,76 +39,175 @@ class SampleViewer extends Component {
         )
         
         const contentInset = { top: 20, bottom: 20 }
-        
+
         return (
             <ScrollView 
                 horizontal={false}
                 decelerationRate={0}
                 showsHorizontalScrollIndicator={false}>
-                <View>
-                    <ShowcaseCard>
-                        <View style={{ height: 200, width: 348, flexDirection: 'row' }}>
-                        <YAxis
-                            data={ this.state.accelsX }
-                            contentInset={ contentInset }
-                            svg={{
-                                fill: 'grey',
-                                fontSize: 10,
-                            }}
-                            numberOfTicks={ 10 }/>
-                        <LineChart
-                            style={{ flex: 1, marginLeft: 16 }}
-                            data={ this.state.accelsX }
-                            contentInset={ contentInset }
-                            svg={{strokeWidth: 2, stroke: 'url(#gradient)'}}>
-                            <Gradient/>
-                            <Grid/>
-                        </LineChart>
-                        </View>
-                    </ShowcaseCard>
-                    <ShowcaseCard>
-                        <View style={{ height: 200, width: 348, flexDirection: 'row' }}>
-                        <YAxis
-                            data={ this.state.accelsY }
-                            contentInset={ contentInset }
-                            svg={{
-                                fill: 'grey',
-                                fontSize: 10,
-                            }}
-                            numberOfTicks={ 10 }/>
-                        <LineChart
-                            style={{ flex: 1, marginLeft: 16 }}
-                            data={ this.state.accelsY }
-                            contentInset={ contentInset }
-                            svg={{strokeWidth: 2, stroke: 'url(#gradient)'}}>
-                            <Gradient/>
-                            <Grid/>
-                        </LineChart>
-                        </View>
-                    </ShowcaseCard>
-                    <ShowcaseCard>
-                        <View style={{ height: 200, width: 348, flexDirection: 'row' }}>
-                        <YAxis
-                            data={ this.state.accelsZ }
-                            contentInset={ contentInset }
-                            svg={{
-                                fill: 'grey',
-                                fontSize: 10,
-                            }}
-                            numberOfTicks={ 10 }/>
-                        <LineChart
-                            style={{ flex: 1, marginLeft: 16 }}
-                            data={ this.state.accelsZ }
-                            contentInset={ contentInset }
-                            svg={{strokeWidth: 2, stroke: 'url(#gradient)'}}>
-                            <Gradient/>
-                            <Grid/>
-                        </LineChart>
-                        </View>
-                    </ShowcaseCard>
+                <View style={{ flexDirection: 'column', flex: 1}}>
+                    <View style={{ flex: 1 }}>
+                        <Text style={styles.titleText}>Accelerometer X</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <ShowcaseCard>
+                            <View style={{ height: 200, width: 348, flexDirection: 'row' }}>
+                            <YAxis
+                                data={ this.state.accelsX }
+                                contentInset={ contentInset }
+                                svg={{
+                                    fill: 'grey',
+                                    fontSize: 10,
+                                }}
+                                numberOfTicks={ 10 }/>
+                            <LineChart
+                                style={{ flex: 1, marginLeft: 16 }}
+                                data={ this.state.accelsX }
+                                contentInset={ contentInset }
+                                svg={{strokeWidth: 2, stroke: 'url(#gradient)'}}>
+                                <Gradient/>
+                                <Grid/>
+                            </LineChart>
+                            </View>
+                        </ShowcaseCard>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <Text style={styles.titleText}>Accelerometer Y</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <ShowcaseCard>
+                            <View style={{ height: 200, width: 348, flexDirection: 'row' }}>
+                            <YAxis
+                                data={ this.state.accelsY }
+                                contentInset={ contentInset }
+                                svg={{
+                                    fill: 'grey',
+                                    fontSize: 10,
+                                }}
+                                numberOfTicks={ 10 }/>
+                            <LineChart
+                                style={{ flex: 1, marginLeft: 16 }}
+                                data={ this.state.accelsY }
+                                contentInset={ contentInset }
+                                svg={{strokeWidth: 2, stroke: 'url(#gradient)'}}>
+                                <Gradient/>
+                                <Grid/>
+                            </LineChart>
+                            </View>
+                        </ShowcaseCard>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <Text style={styles.titleText}>Accelerometer Z</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <ShowcaseCard>
+                            <View style={{ height: 200, width: 348, flexDirection: 'row' }}>
+                            <YAxis
+                                data={ this.state.accelsZ }
+                                contentInset={ contentInset }
+                                svg={{
+                                    fill: 'grey',
+                                    fontSize: 10,
+                                }}
+                                numberOfTicks={ 10 }/>
+                            <LineChart
+                                style={{ flex: 1, marginLeft: 16 }}
+                                data={ this.state.accelsZ }
+                                contentInset={ contentInset }
+                                svg={{strokeWidth: 2, stroke: 'url(#gradient)'}}>
+                                <Gradient/>
+                                <Grid/>
+                            </LineChart>
+                            </View>
+                        </ShowcaseCard>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <Text style={styles.titleText}>Magnetometer X</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <ShowcaseCard>
+                            <View style={{ height: 200, width: 348, flexDirection: 'row' }}>
+                            <YAxis
+                                data={ this.state.gyrosX }
+                                contentInset={ contentInset }
+                                svg={{
+                                    fill: 'grey',
+                                    fontSize: 10,
+                                }}
+                                numberOfTicks={ 10 }/>
+                            <LineChart
+                                style={{ flex: 1, marginLeft: 16 }}
+                                data={ this.state.gyrosX }
+                                contentInset={ contentInset }
+                                svg={{strokeWidth: 2, stroke: 'url(#gradient)'}}>
+                                <Gradient/>
+                                <Grid/>
+                            </LineChart>
+                            </View>
+                        </ShowcaseCard>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <Text style={styles.titleText}>Magnetometer Y</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <ShowcaseCard>
+                            <View style={{ height: 200, width: 348, flexDirection: 'row' }}>
+                            <YAxis
+                                data={ this.state.gyrosY }
+                                contentInset={ contentInset }
+                                svg={{
+                                    fill: 'grey',
+                                    fontSize: 10,
+                                }}
+                                numberOfTicks={ 10 }/>
+                            <LineChart
+                                style={{ flex: 1, marginLeft: 16 }}
+                                data={ this.state.gyrosY }
+                                contentInset={ contentInset }
+                                svg={{strokeWidth: 2, stroke: 'url(#gradient)'}}>
+                                <Gradient/>
+                                <Grid/>
+                            </LineChart>
+                            </View>
+                        </ShowcaseCard>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <Text style={styles.titleText}>Magnetometer Z</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <ShowcaseCard>
+                            <View style={{ height: 200, width: 348, flexDirection: 'row' }}>
+                            <YAxis
+                                data={ this.state.gyrosZ }
+                                contentInset={ contentInset }
+                                svg={{
+                                    fill: 'grey',
+                                    fontSize: 10,
+                                }}
+                                numberOfTicks={ 10 }/>
+                            <LineChart
+                                style={{ flex: 1, marginLeft: 16 }}
+                                data={ this.state.gyrosZ }
+                                contentInset={ contentInset }
+                                svg={{strokeWidth: 2, stroke: 'url(#gradient)'}}>
+                                <Gradient/>
+                                <Grid/>
+                            </LineChart>
+                            </View>
+                        </ShowcaseCard>
+                    </View>
                 </View>
             </ScrollView>
         );
+    }
+}
+
+const styles = {
+    titleText: {
+        fontSize: 30,
+        color: '#000',
+        margin: 5,
+        textAlign: 'center'
     }
 }
 
