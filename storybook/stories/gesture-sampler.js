@@ -170,7 +170,6 @@ class GestureSampler extends Component {
             var accels = this.accels.slice(startIndex + indices[0], startIndex + indices[1] + 1);
             var gyros = this.gyros.slice(startIndex + indices[0], startIndex + indices[1] + 1);
             this.setState({gestureCount: this.state.gestureCount + 1});
-            console.log("gesture detected");
             if (this.sampleCallback) {
                 this.sampleCallback(accels, gyros);
             }
@@ -249,12 +248,12 @@ class GestureSampler extends Component {
         
         const contentInset = { top: 20, bottom: 20 }
 
-        var x = this.state.lastAccelData[0].toFixed(2);
-        var y = this.state.lastAccelData[1].toFixed(2);
-        var z = this.state.lastAccelData[2].toFixed(2);
-        var wx = this.state.lastGyroData[0].toFixed(2);
-        var wy = this.state.lastGyroData[1].toFixed(2);
-        var wz = this.state.lastGyroData[2].toFixed(2);
+        var x = this.state.lastAccelData[0].toFixed(3);
+        var y = this.state.lastAccelData[1].toFixed(3);
+        var z = this.state.lastAccelData[2].toFixed(3);
+        var wx = this.state.lastGyroData[0].toFixed(3);
+        var wy = this.state.lastGyroData[1].toFixed(3);
+        var wz = this.state.lastGyroData[2].toFixed(3);
 
         return (
             <ScrollView 
@@ -311,21 +310,10 @@ class GestureSampler extends Component {
                     </ShowcaseCard>
                 </ScrollView>
                 <View style={{ flex: 1 }}>
-                    <View style={{ flexDirection: 'row', flex: 1}}>
-                        <View style={{ flex: 0.73 }}>
-                            <ShowcaseCard>
-                                <Text style={styles.text}>x: {x} y: {y} z: {z}</Text>
-                                <Text style={styles.text}>a: {wx} b: {wy} g: {wz}</Text>
-                            </ShowcaseCard>
-                        </View>
-                        <View style={{ flex: 0.27 }}>
-                            <ShowcaseCard>
-                                <View style={{alignItems: 'center'}}>
-                                    <Text style={styles.gestureText}>{this.state.gestureCount}</Text>
-                                </View>
-                            </ShowcaseCard>
-                        </View>
-                    </View>
+                    <ShowcaseCard>
+                        <Text style={styles.text}>x: {x} y: {y} z: {z}</Text>
+                        <Text style={styles.text}>a: {wx} b: {wy} g: {wz}</Text>
+                    </ShowcaseCard>
                 </View>
                 <ScrollView 
                     horizontal={true}
@@ -419,7 +407,7 @@ const styles = {
         width: 40
     },
     text: {
-        fontSize: 20,
+        fontSize: 26,
         color: '#000',
         margin: 5,
         textAlign: 'center'

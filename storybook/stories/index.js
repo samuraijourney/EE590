@@ -52,7 +52,7 @@ import GyroscopeExample from './gyroscope';
 
 import AccelPlotter from './accel-plotter';
 import GestureSampler from './gesture-sampler';
-import Trainer from './trainer'
+import TrainerFlow from './trainer-flow'
 
 storiesOf('AreaChart', module)
     .addDecorator(getStory => <ShowcaseCard>{ getStory() }</ShowcaseCard>)
@@ -113,4 +113,4 @@ storiesOf('Others', module)
 storiesOf('Screens', module)
     .add('Accel plotter', () => <AccelPlotter/>)
     .add('Gesture sampler', () => <GestureSampler/>)
-    .add('Trainer', () => <Trainer/>)
+    .add('Trainer flow', () => <TrainerFlow/>)
