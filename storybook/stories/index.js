@@ -51,7 +51,8 @@ import AccelerometerExample from './accelerometer';
 import GyroscopeExample from './gyroscope';
 
 import AccelPlotter from './accel-plotter';
-import RandomForestTrainer from './ml.js';
+import GestureSampler from './gesture-sampler';
+import Trainer from './trainer'
 
 storiesOf('AreaChart', module)
     .addDecorator(getStory => <ShowcaseCard>{ getStory() }</ShowcaseCard>)
@@ -111,4 +112,5 @@ storiesOf('Others', module)
 
 storiesOf('Screens', module)
     .add('Accel plotter', () => <AccelPlotter/>)
-    .add('Random forest trainer', () => <RandomForestTrainer/>)
+    .add('Gesture sampler', () => <GestureSampler/>)
+    .add('Trainer', () => <Trainer/>)
