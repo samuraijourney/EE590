@@ -248,12 +248,12 @@ class GestureSampler extends Component {
         
         const contentInset = { top: 20, bottom: 20 }
 
-        var x = this.state.lastAccelData[0].toFixed(3);
-        var y = this.state.lastAccelData[1].toFixed(3);
-        var z = this.state.lastAccelData[2].toFixed(3);
-        var wx = this.state.lastGyroData[0].toFixed(3);
-        var wy = this.state.lastGyroData[1].toFixed(3);
-        var wz = this.state.lastGyroData[2].toFixed(3);
+        var x = this.state.lastAccelData[0].toFixed(2);
+        var y = this.state.lastAccelData[1].toFixed(2);
+        var z = this.state.lastAccelData[2].toFixed(2);
+        var wx = this.state.lastGyroData[0].toFixed(2);
+        var wy = this.state.lastGyroData[1].toFixed(2);
+        var wz = this.state.lastGyroData[2].toFixed(2);
 
         return (
             <ScrollView 
@@ -407,7 +407,7 @@ const styles = {
         width: 40
     },
     text: {
-        fontSize: 26,
+        fontSize: 30,
         color: '#000',
         margin: 5,
         textAlign: 'center'

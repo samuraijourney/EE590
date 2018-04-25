@@ -61,7 +61,9 @@ class Trainer extends Component {
     }
 
     train() {
-
+        // Known label from state label
+        // Known list of samples
+        // Time to process!!!
     }
 
     render() {
