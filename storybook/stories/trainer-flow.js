@@ -63,9 +63,10 @@ class TrainerFlow extends Component {
                             accelsX={this.state.accelsX}
                             accelsY={this.state.accelsY}
                             accelsZ={this.state.accelsZ}
+                            currentIndex={this.state.index}
                             gyrosX={this.state.gyrosX}
                             gyrosY={this.state.gyrosY}
-                            gyrosZ={this.state.gyrosZ}
+                            gyrosZ={this.state.gyrosZ}                   
                             sampleCount={this.state.sampleCount}
                             onSampleReset={this.resetSamples}/>
         };
