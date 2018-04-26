@@ -3,7 +3,10 @@ import { View } from 'react-native'
 
 const ShowcaseContainer = ({ children }) => (
     <View style={{
-        margin: 16,
+        marginTop: 10,
+        marginBottom: 10,
+        marginLeft: 16,
+        marginRight: 16,
         paddingHorizontal: 16,
         backgroundColor: 'white',
         shadowOffset: {

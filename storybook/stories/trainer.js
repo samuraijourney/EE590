@@ -1,26 +1,40 @@
 import React, { Component } from 'react';
-import { Text, View, TouchableHighlight } from 'react-native';
+import { ListView, Text, View, TouchableHighlight } from 'react-native';
 import ShowcaseCard from './decorators/showcase-container'
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
-import { Sae, Kohana } from 'react-native-textinput-effects';
+import { Sae } from 'react-native-textinput-effects';
+import Recognizer from './recognizer';
 
 class Trainer extends Component {
     constructor(props) {
         super(props);
+        var ds = new ListView.DataSource({
+            rowHasChanged: (row1, row2) => row1 !== row2,
+        });
         this.state = {
             accelsX: [],
             accelsY: [],
             accelsZ: [],
+            dataSource: ds.cloneWithRows([]),
             gyrosX: [],
             gyrosY: [],
             gyrosZ: [],
             label: "",
+            models: [],
+            newAccelX: 0,
+            newAccelY: 0,
+            newAccelZ: 0,
+            newGyroX: 0,
+            newGyroY: 0,
+            newGyroZ: 0,
             sampleCount: 0
         };
 
         this.reset = this.reset.bind(this);
         this.train = this.train.bind(this);
         this.sampleResetCallback = this.props.onSampleReset;
+        
+        this.models = [];
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
@@ -40,6 +54,12 @@ class Trainer extends Component {
             gyrosX: prevState.gyrosX,
             gyrosY: prevState.gyrosY,
             gyrosZ: prevState.gyrosZ,
+            newAccelX: nextProps.accelsX,
+            newAccelY: nextProps.accelsY,
+            newAccelZ: nextProps.accelsZ,
+            newGyroX: nextProps.gyrosX,
+            newGyroY: nextProps.gyrosY,
+            newGyroZ: nextProps.gyrosZ,
             sampleCount: nextProps.sampleCount
         };
     }
@@ -64,6 +84,15 @@ class Trainer extends Component {
         // Known label from state label
         // Known list of samples
         // Time to process!!!
+        var model = {
+            label: this.state.label
+        }
+        this.models.push(model);
+        this.setState({
+            dataSource: this.state.dataSource.cloneWithRows(this.models),
+            models: this.models
+        });
+        this.reset();
     }
 
     render() {
@@ -92,14 +121,25 @@ class Trainer extends Component {
                     <View style={styles.buttonContainer}>
                         <TouchableHighlight style={styles.buttonChoice} 
                             onPress={this.train} 
-                            disabled={(this.state.sampleCount < 5) && (this.state.label == "")}>
+                            disabled={(this.state.label == "")}>
                             <Text style={styles.button}>Train</Text>
                         </TouchableHighlight>
-                        <TouchableHighlight style={styles.buttonChoice} onPress={this.reset = this.reset}>
+                        <TouchableHighlight style={styles.buttonChoice} onPress={this.reset}>
                             <Text style={styles.button}>Reset</Text>
                         </TouchableHighlight>
                     </View>
                 </ShowcaseCard>
+                <ListView
+                    style={{marginTop: 10}}
+                    dataSource={this.state.dataSource}
+                    renderRow={(model) => 
+                        <Recognizer model={model}
+                                    accelX={this.state.newAccelX}
+                                    accelY={this.state.newAccelY}
+                                    accelZ={this.state.newAccelZ}
+                                    gyroX={this.state.newGyroX}
+                                    gyroY={this.state.newGyroY}
+                                    gyroZ={this.state.newGyroZ}/>}/>
             </View>
         );
     }
@@ -134,7 +174,7 @@ const styles = {
         width: 150
     },
     sampleText: {
-        fontSize: 100,
+        fontSize: 70,
         color: '#000',
         margin: 5,
         textAlign: 'center'
@@ -146,4 +186,5 @@ const styles = {
         textAlign: 'center'
     }
 }
+
 export default Trainer;
