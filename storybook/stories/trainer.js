@@ -5,10 +5,10 @@ import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import { Sae } from 'react-native-textinput-effects';
 import Samples from './samples';
 import Recognizer from './recognizer';
-import forestjs from './random_forest';
 
 var fft = require('fft-js').fft;
 var fftUtil = require('fft-js').util;
+var forestjs = require('./random_forest').forestjs;
 
 class Trainer extends Component {
     constructor(props) {
@@ -212,9 +212,9 @@ class Trainer extends Component {
         // Time to process!!!
         x = this.getTrainingDataMatrix();
         y = this.state.dataLabels;
-        forest = forestjs.RandomForest();
-        forest.train(y, x); 
-        
+        forest = new forestjs.RandomForest();
+        forest.train(y, x);
+
         var models = [];
         for (var i = 0; i < this.labels.length; i++) {
             models.push({
@@ -285,7 +285,8 @@ class Trainer extends Component {
                                                 accelZ={this.state.newAccelZ}
                                                 gyroX={this.state.newGyroX}
                                                 gyroY={this.state.newGyroY}
-                                                gyroZ={this.state.newGyroZ}/>}/>
+                                                gyroZ={this.state.newGyroZ}
+                                                update={this.state.update}/>}/>
                         </View>
                     </View>
                 </View>
