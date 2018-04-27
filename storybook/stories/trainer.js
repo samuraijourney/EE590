@@ -210,13 +210,18 @@ class Trainer extends Component {
         // Known label from state labels: this.state.dataLabels
         // Known list of samples: this.state.accels*, this.state.gyros*
         // Time to process!!!
-        x = this.getTrainingDataMatrix();
-        y = this.state.dataLabels;
-        forest = new forestjs.RandomForest();
-        forest.train(y, x);
+        data = this.getTrainingDataMatrix();
 
         var models = [];
+        var labels = [];
         for (var i = 0; i < this.labels.length; i++) {
+            for (var j = 0; j < this.labels.length; j++) {
+                labels.push(this.labels[i] == this.labels[j] ? 1 : -1); 
+            }
+            
+            forest = new forestjs.RandomForest();
+            forest.train(data, labels);
+
             models.push({
                 label: this.labels[i],
                 forest: forest

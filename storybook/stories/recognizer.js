@@ -132,7 +132,7 @@ class Recognizer extends Component {
         x = x[0].concat(x[1]).concat(x[2]).concat(x[3]).concat(x[4]).concat(x[5]);
 
         result = model.forest.predictOne(x);
-        console.log("Classification Result: " + result);
+        console.log("Classification Result For " + model.label + ": " + result);
     }
 
     render() {
