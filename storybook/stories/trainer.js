@@ -2,9 +2,13 @@ import React, { Component } from 'react';
 import { ListView, Text, View, TouchableHighlight } from 'react-native';
 import ShowcaseCard from './decorators/showcase-container'
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
-import { Akira, Sae, Makiko } from 'react-native-textinput-effects';
+import { Sae } from 'react-native-textinput-effects';
 import Samples from './samples';
 import Recognizer from './recognizer';
+import forestjs from './random_forest';
+
+var fft = require('fft-js').fft;
+var fftUtil = require('fft-js').util;
 
 class Trainer extends Component {
     constructor(props) {
@@ -36,11 +40,13 @@ class Trainer extends Component {
         };
 
         this.addGestureLabel = this.addGestureLabel.bind(this);
+        this.getTrainingDataMatrix = this.getTrainingDataMatrix.bind(this);
         this.reset = this.reset.bind(this);
         this.train = this.train.bind(this);
         this.sampleResetCallback = this.props.onSampleReset;
         
         this.labels = [];
+        this.sampleLength = 15;
     }
 
     addGestureLabel() {
@@ -67,7 +73,7 @@ class Trainer extends Component {
             prevState.gyrosX.push(nextProps.gyrosX);
             prevState.gyrosY.push(nextProps.gyrosY);
             prevState.gyrosZ.push(nextProps.gyrosZ);
-            prevState.dataLabels.push(this.state.label);
+            prevState.dataLabels.push(prevState.label);
             update = true;
 
         } else {
@@ -92,6 +98,90 @@ class Trainer extends Component {
             sampleCount: nextProps.sampleCount,
             update: update
         };
+    }
+
+    getTrainingDataMatrix() {
+        var n = this.state.dataLabels.length;
+        var x = new Array(n);
+        var d = 6;
+
+        var x = new Array(n);
+        for (var i = 0; i < n; i++) {
+            x[i] = new Array(d);
+        }
+
+        for (var i = 0; i < n; i++) {
+            nextPowerOf2 = Math.pow( 2, Math.ceil(Math.log(this.state.accelsX[i].length) / Math.log(2)));
+            while(this.state.accelsX[i].length != nextPowerOf2) {
+                this.state.accelsX[i].push(0);
+                this.state.accelsY[i].push(0);
+                this.state.accelsZ[i].push(0);
+                this.state.gyrosX[i].push(0);
+                this.state.gyrosY[i].push(0);
+                this.state.gyrosZ[i].push(0);
+            }
+
+            var frequencies = [];
+            var magnitudes = [];
+
+            x[i][0] = fft(this.state.accelsX[i]);
+            frequencies = fftUtil.fftFreq(x[i][0], 512);
+            magnitudes = fftUtil.fftMag(x[i][0]); 
+            x[i][0] = frequencies.map(function (f, ix) { return {frequency: f, magnitude: magnitudes[ix]}; });
+            x[i][0].sort(function(first, second) {
+                return second.magnitude - first.magnitude;
+            });
+            x[i][0] = [x[i][0][0].frequency, x[i][0][0].magnitude];
+
+            x[i][1] = fft(this.state.accelsY[i]);
+            frequencies = fftUtil.fftFreq(x[i][1], 512);
+            magnitudes = fftUtil.fftMag(x[i][1]); 
+            x[i][1] = frequencies.map(function (f, ix) { return {frequency: f, magnitude: magnitudes[ix]}; });
+            x[i][1].sort(function(first, second) {
+                return second.magnitude - first.magnitude;
+            });
+            x[i][1] = [x[i][1][0].frequency, x[i][1][0].magnitude];
+
+            x[i][2] = fft(this.state.accelsZ[i]);
+            frequencies = fftUtil.fftFreq(x[i][2], 512);
+            magnitudes = fftUtil.fftMag(x[i][2]); 
+            x[i][2] = frequencies.map(function (f, ix) { return {frequency: f, magnitude: magnitudes[ix]}; });
+            x[i][2].sort(function(first, second) {
+                return second.magnitude - first.magnitude;
+            });
+            x[i][2] = [x[i][2][0].frequency, x[i][2][0].magnitude];
+
+            x[i][3] = fft(this.state.gyrosX[i]);
+            frequencies = fftUtil.fftFreq(x[i][3], 512);
+            magnitudes = fftUtil.fftMag(x[i][3]); 
+            x[i][3] = frequencies.map(function (f, ix) { return {frequency: f, magnitude: magnitudes[ix]}; });
+            x[i][3].sort(function(first, second) {
+                return second.magnitude - first.magnitude;
+            });
+            x[i][3] = [x[i][3][0].frequency, x[i][3][0].magnitude];
+
+            x[i][4] = fft(this.state.gyrosY[i]);
+            frequencies = fftUtil.fftFreq(x[i][4], 512);
+            magnitudes = fftUtil.fftMag(x[i][4]); 
+            x[i][4] = frequencies.map(function (f, ix) { return {frequency: f, magnitude: magnitudes[ix]}; });
+            x[i][4].sort(function(first, second) {
+                return second.magnitude - first.magnitude;
+            });
+            x[i][4] = [x[i][4][0].frequency, x[i][4][0].magnitude];
+            
+            x[i][5] = fft(this.state.gyrosZ[i]);
+            frequencies = fftUtil.fftFreq(x[i][5], 512);
+            magnitudes = fftUtil.fftMag(x[i][5]); 
+            x[i][5] = frequencies.map(function (f, ix) { return {frequency: f, magnitude: magnitudes[ix]}; });
+            x[i][5].sort(function(first, second) {
+                return second.magnitude - first.magnitude;
+            });
+            x[i][5] = [x[i][5][0].frequency, x[i][5][0].magnitude];
+        
+            x[i] = x[i][0].concat(x[i][1]).concat(x[i][2]).concat(x[i][3]).concat(x[i][4]).concat(x[i][5]);
+        }
+
+        return x;
     }
 
     reset() {
@@ -120,10 +210,16 @@ class Trainer extends Component {
         // Known label from state labels: this.state.dataLabels
         // Known list of samples: this.state.accels*, this.state.gyros*
         // Time to process!!!
+        x = this.getTrainingDataMatrix();
+        y = this.state.dataLabels;
+        forest = forestjs.RandomForest();
+        forest.train(y, x); 
+        
         var models = [];
         for (var i = 0; i < this.labels.length; i++) {
             models.push({
-                label: this.labels[i]
+                label: this.labels[i],
+                forest: forest
             })
         }
 
