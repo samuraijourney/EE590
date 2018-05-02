@@ -49,13 +49,19 @@ class Recognizer extends Component {
         super(props);
         this.state = {
             model: props.model,
+            recognitions: 0,
             update: false
         };
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
         if (nextProps.update == true) {
-            Recognizer.recognize(nextProps, prevState.model);
+            var recognized = Recognizer.recognize(nextProps, prevState.model);
+            if (recognized) {
+                return {
+                    recognitions: prevState.recognitions + 1
+                };
+            }
         }
     }
 
@@ -132,7 +138,7 @@ class Recognizer extends Component {
         x = x[0].concat(x[1]).concat(x[2]).concat(x[3]).concat(x[4]).concat(x[5]);
 
         result = model.forest.predictOne(x);
-        console.log("Classification Result For " + model.label + ": " + result);
+        return result > 1.5;
     }
 
     render() {
@@ -145,7 +151,7 @@ class Recognizer extends Component {
                 </View>
                 <View style={{ flex: 0.3 }}>
                     <ShowcaseCard2>
-                        <Text style={styles.text}>0</Text>
+                        <Text style={styles.text}>{this.state.recognitions}</Text>
                     </ShowcaseCard2>
                 </View>
             </View>

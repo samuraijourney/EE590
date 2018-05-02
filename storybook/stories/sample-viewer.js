@@ -122,7 +122,7 @@ class SampleViewer extends Component {
                         </ShowcaseCard>
                     </View>
                     <View style={{ flex: 1 }}>
-                        <Text style={styles.titleText}>Magnetometer X</Text>
+                        <Text style={styles.titleText}>Gyroscope X</Text>
                     </View>
                     <View style={{ flex: 1 }}>
                         <ShowcaseCard>
@@ -147,7 +147,7 @@ class SampleViewer extends Component {
                         </ShowcaseCard>
                     </View>
                     <View style={{ flex: 1 }}>
-                        <Text style={styles.titleText}>Magnetometer Y</Text>
+                        <Text style={styles.titleText}>Gyroscope Y</Text>
                     </View>
                     <View style={{ flex: 1 }}>
                         <ShowcaseCard>
@@ -172,7 +172,7 @@ class SampleViewer extends Component {
                         </ShowcaseCard>
                     </View>
                     <View style={{ flex: 1 }}>
-                        <Text style={styles.titleText}>Magnetometer Z</Text>
+                        <Text style={styles.titleText}>Gyroscope Z</Text>
                     </View>
                     <View style={{ flex: 1 }}>
                         <ShowcaseCard>

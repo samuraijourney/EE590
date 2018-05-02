@@ -213,10 +213,10 @@ class Trainer extends Component {
         data = this.getTrainingDataMatrix();
 
         var models = [];
-        var labels = [];
         for (var i = 0; i < this.labels.length; i++) {
-            for (var j = 0; j < this.labels.length; j++) {
-                labels.push(this.labels[i] == this.labels[j] ? 1 : -1); 
+            var labels = [];
+            for (var j = 0; j < this.state.dataLabels.length; j++) {
+                labels.push(this.labels[i] == this.state.dataLabels[j] ? 1 : -1); 
             }
             
             forest = new forestjs.RandomForest();
