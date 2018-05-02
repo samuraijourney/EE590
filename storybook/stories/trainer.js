@@ -207,12 +207,8 @@ class Trainer extends Component {
     }
 
     train() {
-        // Known label from state labels: this.state.dataLabels
-        // Known list of samples: this.state.accels*, this.state.gyros*
-        // Time to process!!!
-        data = this.getTrainingDataMatrix();
-
         var models = [];
+        data = this.getTrainingDataMatrix();
         for (var i = 0; i < this.labels.length; i++) {
             var labels = [];
             for (var j = 0; j < this.state.dataLabels.length; j++) {
