@@ -5,13 +5,13 @@
  */
 
 import React, { Component } from 'react';
-import AccelPlotter from './storybook/stories/accel-plotter.js'
+import TrainerFlow from './storybook/stories/trainer-flow.js'
 
 type Props = {};
 export default class App extends Component<Props> {
   render() {
     return (
-      <AccelPlotter/>
+      <TrainerFlow/>
     );
   }
 }
