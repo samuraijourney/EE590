@@ -2,15 +2,16 @@
 
 // ------------------------------------------------------- Defines
 
-#define LED_OFF 0
-#define LED_ON 255
-#define MAX_DISPLAY_LEDS 10
-#define MAX_DISPLAY_VALUE 1023
-#define SMOOTHING_GAIN 3.414213562
-#define STEP_DELTA_THRESHOLD 8
-
-#define RESET_PIN 19
-#define START_PIN 4
+#define FIRST_DERIVATIVE_THRESHOLD  0.01
+#define LED_OFF                     0
+#define LED_ON                      255
+#define MAX_DISPLAY_LEDS            9
+#define MAX_DISPLAY_VALUE           511
+#define RESET_PIN                   19
+#define SMOOTHING_GAIN              1058.546241
+#define STATE_LED                   9
+#define STEP_DELTA_THRESHOLD        0.1
+#define TOGGLE_PIN                  4
 
 // --------------------------------------------------------- Types
 
@@ -31,7 +32,10 @@ FLOAT   accelYSmoothing[3];
 USHORT  idleStateIndex;
 BOOLEAN idleStateOn;
 FLOAT   lastMinMaxSmoothAccelMag;
+BOOLEAN lastResetButtonState;
+BOOLEAN lastToggleButtonState;
 FLOAT   prevSmoothAccelMag;
+BOOLEAN reset;
 BOOLEAN start;
 USHORT  stepCount;
 
@@ -58,7 +62,7 @@ getMagnitude(
   ); 
 
 VOID 
-reset();
+resetState();
   
 // ----------------------------------------------------- Functions
 
@@ -84,8 +88,8 @@ detectStep(
   accelYSmoothing[1] = accelYSmoothing[2]; 
   accelYSmoothing[2] = (accelXSmoothing[0] + accelXSmoothing[2]) + 
                        (2 * accelXSmoothing[1]) + 
-                       ( -0.6413515381 * accelYSmoothing[0]) + 
-                       (1.5610180758 * accelYSmoothing[1]);
+                       (-0.9149758348 * accelYSmoothing[0]) + 
+                       (1.9111970674 * accelYSmoothing[1]);
                        
   smoothAccelMag = accelYSmoothing[2];
   stepDetect = false;
@@ -97,18 +101,17 @@ detectStep(
     //
     
     firstDerivative = smoothAccelMag - prevSmoothAccelMag;
-    if (firstDerivative < 0.01) {
+    if (abs(firstDerivative) < FIRST_DERIVATIVE_THRESHOLD) {
 
       //
       // Looking for rising edge magnitude between detected minima/maxima greater than
       // an empirically determined threshold.
       //
+
       stepDelta = smoothAccelMag - lastMinMaxSmoothAccelMag;
       if ((lastMinMaxSmoothAccelMag != 0.0) &&
           (stepDelta > STEP_DELTA_THRESHOLD)) {
 
-        Serial.print("Step Delta: ");
-        Serial.println(stepDelta);   
         stepDetect = true;
       }
       
@@ -189,21 +192,33 @@ loop()
 {
   FLOAT newAccelMag;
   BOOLEAN resetButtonState;
-  BOOLEAN startButtonState;
+  BOOLEAN toggleButtonState;
   BOOLEAN stepDetect;
 
   resetButtonState = digitalRead(RESET_PIN);
-  if (resetButtonState) {
-    reset();
+  if (resetButtonState && !lastResetButtonState) {
+    resetState();
     displayNumber(0);
   }
 
-  startButtonState = digitalRead(START_PIN);
-  if ((startButtonState) && (start == false)) {
-    start = true;
-    displayNumber(0);
+  lastResetButtonState = resetButtonState;
+  toggleButtonState = digitalRead(TOGGLE_PIN);
+  if (toggleButtonState && !lastToggleButtonState) {
+    if (reset) {
+        reset = false;
+        displayNumber(0);
+    }
+
+    start = !start;
+    if (start) {
+      CircuitPlayground.setPixelColor(STATE_LED, LED_OFF, LED_ON, LED_OFF);
+      
+    } else if (!start && !reset) {
+      CircuitPlayground.setPixelColor(STATE_LED, LED_ON, LED_OFF, LED_OFF);
+    }
   }
-  
+
+  lastToggleButtonState = toggleButtonState;
   if (start) {
     newAccelMag = getMagnitude(CircuitPlayground.motionX(),
                                CircuitPlayground.motionY(),
@@ -213,20 +228,21 @@ loop()
     if (stepDetect) {
       stepCount++;
       displayNumber(stepCount);
-      Serial.print("Step Count: ");
-      Serial.println(stepCount);   
     }
 
     delay(10);
     
-  } else {
+  } else if (reset) {
     displayIdlePattern();
     delay(100);
+
+  } else {
+    delay(10);
   }
 }
 
 VOID 
-reset() 
+resetState() 
 {
   accelXSmoothing[0] = 0.0;
   accelXSmoothing[1] = 0.0;
@@ -237,18 +253,20 @@ reset()
   idleStateIndex = 0;
   idleStateOn = true;
   lastMinMaxSmoothAccelMag = 0.0;
+  lastResetButtonState = true;
+  lastToggleButtonState = false;
   prevSmoothAccelMag = 0.0;
+  reset = true;
   start = false;
   stepCount = 0;
+  CircuitPlayground.setPixelColor(STATE_LED, LED_OFF, LED_OFF, LED_ON);
 }
 
 VOID 
 setup() 
 {
-  while (!Serial);  
-  Serial.begin(9600);
   CircuitPlayground.begin();
   pinMode(RESET_PIN, INPUT);
-  pinMode(START_PIN, INPUT);
-  reset();
+  pinMode(TOGGLE_PIN, INPUT);
+  resetState();
 }
