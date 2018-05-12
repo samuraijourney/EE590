@@ -1,54 +1,51 @@
-------------------------------------------------------- Defines
+#include <Adafruit_CircuitPlayground.h>
+
+// ------------------------------------------------------- Defines
 
 #define LED_OFF 0
 #define LED_ON 255
 #define MAX_DISPLAY_LEDS 10
 #define MAX_DISPLAY_VALUE 1023
 #define SMOOTHING_GAIN 3.414213562
+#define STEP_DELTA_THRESHOLD 8
 
-#define ACCELEROMETER_CS_PIN 8
-#define ACCELEROMETER_INTERRUPT_PIN 7
-#define RESET_INTERRUPT_PIN 19
-#define START_INTERRUPT_PIN 4
+#define RESET_PIN 19
+#define START_PIN 4
 
---------------------------------------------------------- Types
+// --------------------------------------------------------- Types
 
 //
 // Been working with Windows kernel a little too much...
 //
 
 typedef bool                BOOLEAN;
-typedef false               FALSE;
 typedef float               FLOAT;
-typedef true                TRUE;
 typedef unsigned long long  ULONGLONG;
 typedef unsigned short      USHORT;
 typedef void                VOID;
 
-------------------------------------------------------- Globals
+// ------------------------------------------------------- Globals
 
 FLOAT   accelXSmoothing[3];
 FLOAT   accelYSmoothing[3];
+USHORT  idleStateIndex;
+BOOLEAN idleStateOn;
 FLOAT   lastMinMaxSmoothAccelMag;
 FLOAT   prevSmoothAccelMag;
-FLOAT   newAccelMag;
-BOOLEAN newAccelAvailable;
 BOOLEAN start;
 USHORT  stepCount;
 
----------------------------------------------------- Prototypes
+// ---------------------------------------------------- Prototypes
 
-void 
-accelIsr(
-  VOID
-  );
-
-void
+BOOLEAN
 detectStep(
   FLOAT accelMagnitude
   );
-  
-void 
+
+VOID
+displayIdlePattern();
+
+VOID 
 displayNumber(
   USHORT value
   );
@@ -57,45 +54,22 @@ FLOAT
 getMagnitude(
   FLOAT x,
   FLOAT y,
-  FLOAT z,
+  FLOAT z
   ); 
 
-void 
-reset(
-  VOID
-  );
-
-void 
-resetIsr(
-  VOID
-  );
-
-void 
-startIsr(
-  VOID
-  );
+VOID 
+reset();
   
------------------------------------------------------ Functions
+// ----------------------------------------------------- Functions
 
-void 
-accelIsr(
-  VOID
-  ) 
-{
-  newAccelMag = getMagnitude(CircuitPlayground.motionX(),
-                             CircuitPlayground.motionY(),
-                             CircuitPlayground.motionZ());
-                             
-  newAccelAvailable = TRUE;
-}
-
-void
+BOOLEAN
 detectStep(
   FLOAT accelMagnitude
   )
 {
   FLOAT firstDerivative;
   FLOAT smoothAccelMag;
+  FLOAT stepDelta;
   BOOLEAN stepDetect;
 
   //
@@ -114,7 +88,7 @@ detectStep(
                        (1.5610180758 * accelYSmoothing[1]);
                        
   smoothAccelMag = accelYSmoothing[2];
-  stepDetect = FALSE;
+  stepDetect = false;
   if (prevSmoothAccelMag != 0.0) {
 
     //
@@ -129,11 +103,13 @@ detectStep(
       // Looking for rising edge magnitude between detected minima/maxima greater than
       // an empirically determined threshold.
       //
-      
+      stepDelta = smoothAccelMag - lastMinMaxSmoothAccelMag;
       if ((lastMinMaxSmoothAccelMag != 0.0) &&
-          (smoothAccelMag - lastMinMaxSmoothAccelMag) > 5) {
-          
-          stepDetect = TRUE;
+          (stepDelta > STEP_DELTA_THRESHOLD)) {
+
+        Serial.print("Step Delta: ");
+        Serial.println(stepDelta);   
+        stepDetect = true;
       }
       
       lastMinMaxSmoothAccelMag = smoothAccelMag;
@@ -144,7 +120,28 @@ detectStep(
   return stepDetect;
 }
 
-void 
+VOID
+displayIdlePattern() 
+{
+  USHORT value;
+
+  if (idleStateOn) {
+    value = LED_ON;
+    
+  } else {
+    value = LED_OFF;
+  }
+  
+  CircuitPlayground.setPixelColor(idleStateIndex, value, value, value);
+  idleStateIndex++;
+  if (idleStateIndex == MAX_DISPLAY_LEDS) {
+    idleStateOn = !idleStateOn;
+  }
+  
+  idleStateIndex %= MAX_DISPLAY_LEDS;
+}
+
+VOID 
 displayNumber(
   USHORT value
   ) 
@@ -160,10 +157,13 @@ displayNumber(
   ledIndex = 0;
   remainder = value;
   while (remainder > 0) {
-    enabledLed = (remainder % 2) != 0;
+    enableLed = (remainder % 2) != 0;
     remainder = remainder / 2;
     if (enableLed) {
       CircuitPlayground.setPixelColor(ledIndex, LED_ON, LED_ON, LED_ON);
+      
+    } else {
+      CircuitPlayground.setPixelColor(ledIndex, LED_OFF, LED_OFF, LED_OFF);
     }
 
     ledIndex++;
@@ -178,39 +178,55 @@ FLOAT
 getMagnitude(
   FLOAT x,
   FLOAT y,
-  FLOAT z,
+  FLOAT z
   ) 
 {
   return sqrt(x*x + y*y + z*z);
 }
 
-void 
-loop(
-  VOID
-  ) 
+VOID 
+loop() 
 {
+  FLOAT newAccelMag;
+  BOOLEAN resetButtonState;
+  BOOLEAN startButtonState;
   BOOLEAN stepDetect;
 
+  resetButtonState = digitalRead(RESET_PIN);
+  if (resetButtonState) {
+    reset();
+    displayNumber(0);
+  }
+
+  startButtonState = digitalRead(START_PIN);
+  if ((startButtonState) && (start == false)) {
+    start = true;
+    displayNumber(0);
+  }
+  
   if (start) {
-    if (newAccelAvailable) {
-      stepDetect = detectStep(newAccelMag);
-      if (stepDetect) {
-        stepCount++;
-        displayNumber(stepCount);
-      }
-      
-      newAccelAvailable = FALSE;
+    newAccelMag = getMagnitude(CircuitPlayground.motionX(),
+                               CircuitPlayground.motionY(),
+                               CircuitPlayground.motionZ());
+                               
+    stepDetect = detectStep(newAccelMag);
+    if (stepDetect) {
+      stepCount++;
+      displayNumber(stepCount);
+      Serial.print("Step Count: ");
+      Serial.println(stepCount);   
     }
-     
-  } else {
+
+    delay(10);
     
+  } else {
+    displayIdlePattern();
+    delay(100);
   }
 }
 
-void 
-reset(
-  VOID
-  ) 
+VOID 
+reset() 
 {
   accelXSmoothing[0] = 0.0;
   accelXSmoothing[1] = 0.0;
@@ -218,37 +234,21 @@ reset(
   accelYSmoothing[0] = 0.0;
   accelYSmoothing[1] = 0.0;
   accelYSmoothing[2] = 0.0;
+  idleStateIndex = 0;
+  idleStateOn = true;
   lastMinMaxSmoothAccelMag = 0.0;
   prevSmoothAccelMag = 0.0;
-  newAccelMag = 0.0;
-  newAccelAvailable = FALSE;
-  start = FALSE;
+  start = false;
   stepCount = 0;
 }
 
-void 
-resetIsr(
-  VOID
-  ) 
+VOID 
+setup() 
 {
+  while (!Serial);  
+  Serial.begin(9600);
+  CircuitPlayground.begin();
+  pinMode(RESET_PIN, INPUT);
+  pinMode(START_PIN, INPUT);
   reset();
-}
-
-void 
-setup(
-  VOID
-  ) 
-{
-  attachInterrupt(digitalPinToInterrupt(ACCELEROMETER_INTERRUPT_PIN), accelIsr, FALLING);
-  attachInterrupt(digitalPinToInterrupt(RESET_INTERRUPT_PIN), resetIsr, FALLING);
-  attachInterrupt(digitalPinToInterrupt(START_INTERRUPT_PIN), startIsr, FALLING);
-  reset();
-}
-
-void 
-startIsr(
-  VOID
-  ) 
-{
-  start = TRUE;
 }
