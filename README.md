@@ -6,4 +6,4 @@ The business logic for the application can be found [here](https://github.com/sa
 
 The final application looks like this!
 
-![Alt Text](https://media.giphy.com/media/7OX5kIWB2EkMDQeknE/giphy.gif)
+![Alt Text](https://github.com/samuraijourney/EE590/blob/A3/arduino/A3.gif)
